@@ -1,19 +1,21 @@
 package com.example.demo123;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 public class TestController {
 
+//    Ova e dependency injection, namesto da kreirash instanca od PersonRepository Spring gi kreira i gi injecti-ira tuka so @Autowired
 
-    List<Person> persons = new ArrayList<>();
+    @Autowired
+    PersonRepository personRepository;
 
     @GetMapping("/")
     public List<Person> sample() {
-        return persons;
+        return null;
     }
 
 //    @RequestBody go transformira JSOn vo Java Object preku Jackson Mapper
@@ -26,7 +28,7 @@ public class TestController {
 //  }
     @PostMapping("/")
     public Person add(@RequestBody Person person) {
-        persons.add(person);
+        personRepository.save(person);
         return person;
     }
 
@@ -34,13 +36,13 @@ public class TestController {
 //    kje se mapira 1 vo id
 
     @GetMapping("/{id}")
-    public Person getOne(@PathVariable("id") String id) {
+    public Person getOne(@PathVariable("id") int id) {
         Person person = null;
 
-//        Prebaruvash vo listata dali kje go najdesh objektot so toa id
-        for (Person p: persons) {
-            if(p.getId().equals(id))
-                person = p;
+        try {
+            person = (Person) personRepository.findById(id).orElseThrow(() -> new Exception("Person not found"));
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
 
         return person;
